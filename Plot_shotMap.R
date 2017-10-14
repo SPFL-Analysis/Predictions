@@ -1,20 +1,23 @@
 
 library(RODBC)
 library(ggplot2)
-channel <- odbcConnect("SPFL")
 
-# Data -------------------------------------------------------------------------------------------------------------
 
-shot_data <- sqlQuery(channel, "select * from dbo.getShotMapData('Albion Rovers','Raith Rovers','2017-09-30')")
+# plot shot map -------------------------------------------------------------------------------------------------------------
 
-# Run Function -------------------------------------------------------------------------------------------------------------
 
-create_shotmap(shot_data)
+create_shotmap('Dumbarton','St Mirren','2017-10-14')
 
-# Create Function -------------------------------------------------------------------------------------------------------------
+# Function -------------------------------------------------------------------------------------------------------------
 
-create_shotmap <- function(df) {
+create_shotmap <- function(home, away, date) {
   
+  channel <- odbcConnect("SPFL")
+  
+  qry <- paste("select * from dbo.getShotMapData('", home, "', '", away, "', '", date, "')",sep = "")
+  df <- sqlQuery(channel, qry)
+  
+  odbcClose(channel)
   
   df$home <- as.character(df$home)
   df$away <- as.character(df$away)
