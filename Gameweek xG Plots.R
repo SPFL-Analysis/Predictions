@@ -9,15 +9,15 @@ library(stringr)
 channel <- odbcConnect("SPFL")
 
 
-GW_results_prem <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-09-29', '2017-09-30', 'Premiership')")
+GW_results_prem <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-11-04', '2017-11-05', 'Premiership')")
 
-GW_results_champ <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-09-29', '2017-09-30', 'Championship')")
+GW_results_champ <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-11-04', '2017-11-05', 'Championship')")
 
-GW_results_L1 <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-09-29', '2017-09-30', 'League 1')")
+GW_results_L1 <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-11-04', '2017-11-05', 'League 1')")
 
-GW_results_L2 <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-09-29', '2017-09-30', 'League 2')")
+GW_results_L2 <- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-11-04', '2017-11-05', 'League 2')")
 
-
+#GW_results_cup<- sqlQuery(channel, "select * from dbo.[gameweek_results_v2] ('2017-11-04', '2017-11-05', 'Scottish Cup')")
 
 ##########################################################################################
 ## plot game week results 
@@ -32,6 +32,7 @@ p2 <- plot_GW_results_v2(GW_results_champ)
 p3 <- plot_GW_results_v2(GW_results_L1)
 
 p4 <- plot_GW_results_v2(GW_results_L2)
+
 
 multiplot(p1, p2, p3, p4, cols = 2) #manually added function see scrpit multiplot.R
 

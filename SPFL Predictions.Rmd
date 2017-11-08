@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F)
 ```
 
-Plots of the Bookies versus my own modelled predictions for SPFL games on the gameweek 9 2017/2018 season. 
+Plots of the Bookies versus my own modelled predictions for SPFL games on the gameweek 14 2017/2018 season.
 
 
 ```{r include=FALSE, echo=FALSE}
@@ -15,13 +15,16 @@ Plots of the Bookies versus my own modelled predictions for SPFL games on the ga
 library(RODBC)
 library(ggplot2)
 library(odds.converter)
+library(crayon)
 channel <- odbcConnect("SPFL")
 
-prices_Prem <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-10-14') where model_desc <> 'Bookies' and league = 'Premiership'")
+prices_Prem <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-11-11') where model_desc <> 'Bookies' and league = 'Premiership'")
 
-prices_Champ <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-10-14') where model_desc <> 'Bookies' and league = 'Championship'")
+prices_Champ <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-11-11') where model_desc <> 'Bookies' and league = 'Championship'")
 
-prices_L1 <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-10-14') where model_desc <> 'Bookies' and league = 'League 1'")
+prices_L1 <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-11-11') where model_desc <> 'Bookies' and league = 'League 1'")
+
+prices_L2 <- sqlQuery(channel, "select * from [dbo].[getMarket_v_Model_odds] ('2017-11-11') where model_desc <> 'Bookies' and league = 'League 2'")
 
 df <- data.frame(
   x = c("xG", "Goals", "DC"),
@@ -67,31 +70,38 @@ plotAnalysis <- function(price_data) {
 
 ```
 
-###Premiership
+###`r if(nrow(prices_Prem) > 0) "Premiership" `
 
 ```{r}
 
-plotAnalysis(prices_Prem)
+if(nrow(prices_Prem) > 0) plotAnalysis(prices_Prem)
 
 ```
 
-###Championship
+###`r if(nrow(prices_Champ) > 0) "Championship" `
 
 ```{r}
 
-plotAnalysis(prices_Champ)
+if(nrow(prices_Champ) > 0) plotAnalysis(prices_Champ)
 
 ```
 
 
-###League 1
+### `r if(nrow(prices_L1) > 0) "League 1" `
 
 ```{r}
 
-plotAnalysis(prices_L1)
+if(nrow(prices_L1) > 0) plotAnalysis(prices_L1)
 
 ```
 
+### `r if(nrow(prices_L2) > 0) "League 2" `
+
+```{r}
+
+if(nrow(prices_L2) > 0) plotAnalysis(prices_L2)
+
+```
 
 
 

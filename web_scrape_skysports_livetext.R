@@ -14,29 +14,40 @@ library(dplyr)
 
 SPFL_LeagueCup <- read.csv("C:/Users/David/Downloads/LeagueCup_QF_25th_Sept_2017.csv")
 
-SPFL_Prem <- read.csv("C:/Users/David/Downloads/SPFL_Prem_1st_Oct_2017.csv")
-SPFL_Champ <- read.csv("C:/Users/David/Downloads/SPFL_Champ_1st_Oct_2017.csv")
-SPFL_L1 <- read.csv("C:/Users/David/Downloads/SPFL_L1_1st_Oct_2017.csv")
-SPFL_L2 <- read.csv("C:/Users/David/Downloads/SPFL_L2_1st_Oct_2017.csv")
+SPFL_Cup <- read.csv("C:/Users/David/Downloads/SPFL_Cup_14th_Oct_2017.csv")
 
+SPFL_Prem <- read.csv("C:/Users/David/Downloads/prem.csv")
+SPFL_Champ <- read.csv("C:/Users/David/Downloads/champ.csv")
+SPFL_L1 <- read.csv("C:/Users/David/Downloads/L1.csv")
+SPFL_L2 <- read.csv("C:/Users/David/Downloads/L2.csv")
+
+
+yearGames <- '2017'
 
 
 filter(SPFL_Prem, grepl("http://www.skysports.com/football", Link, fixed = TRUE))[1:6,] %>%
   select(Link) %>%
-  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'Premiership', '2017')
+  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'Premiership', yearGames)
 
 
 filter(SPFL_Champ, grepl("http://www.skysports.com/football", Link, fixed = TRUE))[1:5,] %>%
   select(Link) %>%
-  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'Championship', '2017')
+  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'Championship', yearGames)
 
 filter(SPFL_L1, grepl("http://www.skysports.com/football", Link, fixed = TRUE))[1:5,] %>%
   select(Link) %>%
-  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'League 1', '2017')
+  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'League 1', yearGames)
 
 filter(SPFL_L2, grepl("http://www.skysports.com/football", Link, fixed = TRUE))[1:5,] %>%
   select(Link) %>%
-  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'League 2', '2017')
+  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'League 2', yearGames)
+
+
+# cup games ----------------------------------------------------------------------------------
+
+filter(SPFL_Cup, grepl("http://www.skysports.com/football", Link, fixed = TRUE))[1:14,] %>%
+  select(Link) %>%
+  getSkyLiveText(., 'SPFL_live_text', '2017-2018', 'Scottish Cup', '2017')
 
 
 

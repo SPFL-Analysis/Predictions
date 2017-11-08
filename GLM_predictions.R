@@ -63,7 +63,7 @@ summary(model_xG)
 # Matches to be predicted
 ####################################################################################################
 
-matchdate <- '2017-10-14'
+matchdate <- '2017-11-04'
 
 writePredictionsSQL('2017-2018', matchdate, 'Premiership')
 writePredictionsSQL('2017-2018', matchdate, 'Championship')

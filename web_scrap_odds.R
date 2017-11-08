@@ -22,7 +22,7 @@ tbl_L1 <- getTable("https://spfl.co.uk/league-one/table/")
 tbl_L2 <- getTable("https://spfl.co.uk/league-two/table/")
 
 season <- "2017-2018"
-date <- "2017-09-18"
+date <- "2017-11-01"
 
 writeTableSQL(season, 'Premiership', date, tbl_Prem)
 writeTableSQL(season, 'Championship', date, tbl_Champ)
@@ -46,8 +46,8 @@ sqlQuery(channel,update_qry)
 #######################################
 
 season <- '2017-2018'
-date <- '2017-10-09'
-game_date <- '2017-10-14'
+date <- '2017-11-01'
+game_date <- '2017-11-04'
 
 
 data <- getOddsChecker('https://www.oddschecker.com/football/scottish/premiership')

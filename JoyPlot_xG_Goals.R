@@ -7,8 +7,9 @@ channel <- odbcConnect("SPFL")
 # Premiership
 ####################
 
+
 xG_data <-
-  sqlQuery(channel, "select * from [dbo].[SPFL_Prem_16_17_results]")
+  RODBC::sqlQuery(channel, "select * from [dbo].[SPFL_Prem_16_17_results]")
 
 ggplot(data = xG_data) +
   geom_joy(
