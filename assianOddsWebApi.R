@@ -5,8 +5,8 @@ library(RODBC)
 
 authConn <-
   asianOddsAPI::authenticateConnection(
-    username = "webapiuser17",
-    password = "a96be40cde2d648b6100a27dfc88719c"
+    username = "",
+    password = ""
   )
 
 season <- "2018-2019"
