@@ -57,6 +57,16 @@ fitGlmGoals <- function(GLM_Data){
   return(model_goals)
 }
 
+
+
+tau <- Vectorize(function(xx, yy, lambda, mu, rho){
+  if (xx == 0 & yy == 0){return(1 - (lambda*mu*rho))
+  } else if (xx == 0 & yy == 1){return(1 + (lambda*rho))
+  } else if (xx == 1 & yy == 0){return(1 + (mu*rho))
+  } else if (xx == 1 & yy == 1){return(1 - rho)
+  } else {return(1)}
+})
+
 # fit DC model ----------------------------
 fitDCmodel <- function(data_){
   
@@ -206,13 +216,12 @@ fitDCmodel <- function(data_){
   Time_weight <- -0.00325
   max_date <- max(as.Date(data_$Date,  "%d/%m/%y"), na.rm = FALSE)
   datediffs <- max_date - as.Date(data_$Date, "%d/%m/%y")
-  data_$Time_weight <- as.numeric(max_date - as.Date(data_$Date, "%d/%m/%y"))
-  data_$Time_weight <- exp(Time_weight*data_$Time_weight)
+  data_$Time_weight <- 1 #as.numeric(max_date - as.Date(data_$Date, "%d/%m/%y"))
+  data_$Time_weight <- 1 #exp(Time_weight*data_$Time_weight)
   
   #####################################################################
   #initial parameter estimates
   #####################################################################
-  
   dcm <- DCmodelData(data_) 
   dta <- data_
   
@@ -228,8 +237,8 @@ fitDCmodel <- function(data_){
   # fit the model 
   ########################################################################################################
   
-  model_DC <- auglag(par=par.inits, # starting point for optimiser
-                     fn=DCoptimFn_tw, #function to optimise
+  model_DC <- alabama::auglag(par=par.inits, # starting point for optimiser
+                     fn=DCoptimFn, #function to optimise
                      heq=DCattackConstr, #equality contratinst 
                      DCm=dcm) #data from function
   return(model_DC)
@@ -245,7 +254,8 @@ fitDCmodel <- function(data_){
 ####################################################################################################
 
 match_odds <- function(model_name, home, away){
-  
+  home  <- stringr::str_trim(home)
+  away <- stringr::str_trim(away)
   lambda <- predict(model_name,data.frame(home=1, team=home, opp=away), type="response")
   mu <- predict(model_name,data.frame(home=0, team=away, opp=home), type="response")
   
@@ -271,11 +281,34 @@ match_odds <- function(model_name, home, away){
 }
 
 ###################################################################################
+
+writeModelOddsSQL <- function(modelDesc, season, comp, date, df){
+
+  channel <- odbcConnect("SPFL")
+  
+  qry <- paste("insert into SPFL.dbo.model_odds select '"
+               , modelDesc, "', '"
+               , season, "', '"
+               , comp, "', '"
+               , date, "', '"
+               , df[1,1], "', '"
+               , df[1,2], "', '"
+               , df[1,3], "', "
+               , df[1,4], ", '"
+               , df[1,5], "'"
+               , sep="") # create SQL qry
+  
+  sqlQuery(channel, qry) #run query
+  
+  close(channel)
+}
+
+###################################################################################
 # write results to SQl --------------------
 ###################################################################################
 
 writePredictionsSQL <- function(season, date, comp, model_xG, model_goals, model_DC) {
-browser()
+
   GW_matches_qry <- paste("select * from SPFL.[dbo].[getFixtures]('",date, "','", comp, "')", sep="")
   GW_matches <- data.frame(sqlQuery(channel,GW_matches_qry))
   
@@ -322,10 +355,16 @@ writeFT1X2OddsSQL <- function(season, date, FT1X2) {
 # function to scrape all the link from a site which match a pattern
 ################################################################################################
 
-getLinks <- function(URL, matchUrlText) {
+getLinks <- function(URL) {
   pg <- xml2::read_html(URL)
-  links <- tibble::tibble(Link = rvest::html_attr(rvest::html_nodes(pg, "a"), "href"))
-  dplyr::filter(links, grepl(matchUrlText, Link, fixed = TRUE))
+  tibble::tibble(
+    Link = 
+      rvest::html_attr(
+        rvest::html_nodes(
+          pg, 
+          ".matches__link"), 
+        "href")
+    )
 }
 
 #############################################################################################
@@ -466,3 +505,36 @@ create_shotmap <- function(home, away, date) {
 }
 
 #########################################################################################
+
+
+match_odds_DC <- function(model, home, away){
+  
+  lambda <- exp(model$par['HOME'] + model$par[paste('Attack.', home, sep = "")] 
+                + model$par[paste('Defence.', away,sep="")])
+  
+  mu <- exp(model$par[paste('Attack.', away, sep = "")] 
+            + model$par[paste('Defence.', home,sep="")])
+  
+  maxgoal <- 8
+  probability_matrix <- dpois(0:maxgoal, lambda) %*% t(dpois(0:maxgoal, mu))
+  
+  scaling_matrix <- matrix(tau(c(0,1,0,1), c(0,0,1,1), lambda, mu, model$par['RHO']), nrow=2)
+  probability_matrix[1:2, 1:2] <- probability_matrix[1:2, 1:2] / scaling_matrix
+  
+  HomeP <- sum(probability_matrix[lower.tri(probability_matrix)])
+  DrawP <- sum(diag(probability_matrix))
+  AwayP <- sum(probability_matrix[upper.tri(probability_matrix)])
+  
+  HomeWin <- 1.0/HomeP
+  Draw <- 1.0/DrawP
+  AwayWin <- 1.0/AwayP
+  
+  results <- data.frame(home
+                        ,away
+                        , HomeWin
+                        , Draw
+                        , AwayWin , stringsAsFactors = FALSE)
+  
+  return(results)
+  
+}

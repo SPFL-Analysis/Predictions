@@ -7,8 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = F)
 ```
 
-Plots of the Bookies versus my own modelled predictions for SPFL games on gameweek 47 2017/2018 season.
-
+Plots of the Bookies versus my own modelled predictions for SPFL games.
 
 ```{r include=FALSE, echo=FALSE}
 
@@ -17,15 +16,15 @@ library(ggplot2)
 library(odds.converter)
 library(glue)
 channel <- odbcConnect("SPFL")
-gameDate <- '2018-04-24'
+gameDate <- '2018-10-20'
 
-prices_Prem <- sqlQuery(channel, glue::glue("select * from [dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'Premiership'"))
+prices_Prem <- sqlQuery(channel, glue::glue("select * from SPFL.[dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'Premiership'"))
 
-prices_Champ <- sqlQuery(channel, glue::glue("select * from [dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'Championship'"))
+prices_Champ <- sqlQuery(channel, glue::glue("select * from SPFL.[dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'Championship'"))
 
-prices_L1 <- sqlQuery(channel, glue::glue("select * from [dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'League 1'"))
+prices_L1 <- sqlQuery(channel, glue::glue("select * from SPFL.[dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'League 1'"))
 
-prices_L2 <- sqlQuery(channel, glue::glue("select * from [dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'League 2'"))
+prices_L2 <- sqlQuery(channel, glue::glue("select * from SPFL.[dbo].[getMarket_v_Model_odds] ('{gameDate}') where model_desc <> 'Bookies' and league = 'League 2'"))
 
 df <- data.frame(
   x = c("xG", "Goals", "DC"),

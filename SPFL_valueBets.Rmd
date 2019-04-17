@@ -1,0 +1,165 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(include=FALSE, echo=FALSE, warning=FALSE, message=FALSE)
+library(tidyverse)
+library(asianOddsAPI)
+library(RODBC)
+library(alabama)
+channel <- RODBC::odbcConnect("SPFL")
+season <- "2018-2019"
+source(file.path(getwd(), "functions.R"))
+source(file.path(getwd(), 'asianOddsWebApi.R'))
+```
+
+```{r runPredictions}
+leagues <- 
+  c("PREMIERSHIP", "CHAMPIONSHIP", "LEAGUE ONE", "LEAGUE TWO",
+    "LEAGUE 1", "LEAGUE 2")
+matchDates <-
+  select(FT1X2_SQL, leagueName, matchDate) %>% 
+  dplyr::filter(leagueName %in% leagues) %>% 
+    group_by(leagueName, matchDate) %>% 
+    summarise() %>% 
+    nest(matchDate)
+
+
+purrr::pwalk(
+  list(
+    matchDates$leagueName,
+    matchDates$data
+  ),
+  function(x, y) {
+
+    GLM_Data <- 
+      sqlQuery(
+        channel, 
+        glue::glue(
+        "SELECT * FROM SPFL.[dbo].[SPFL_GLM_data] ('{season}', '{x}') 
+        UNION 
+        SELECT * FROM SPFL.[dbo].[SPFL_GLM_data] ('{season}', '{x}')"
+        )
+      )
+    
+    data_ <- 
+      sqlQuery(
+        channel,
+        glue::glue(
+        "select * from SPFL.[dbo].[SPFL_results_DCfit]('{x}', '{season}') 
+        UNION
+        select * from SPFL.[dbo].[SPFL_results_DCfit]('{x}', '{season}')"
+        )
+      )
+    
+    models_xG <- fitGlmXg(GLM_Data)
+    models_goals <- fitGlmGoals(GLM_Data)
+    model_DC <- fitDCmodel(data_)
+    
+    purrr::walk(
+      y$matchDate,
+      ~writePredictionsSQL(
+        season,
+        ., 
+        x, 
+        models_xG, 
+        models_goals, 
+        model_DC)
+    )
+  }
+)
+```
+
+
+
+```{r bets}
+gameDate <-  
+  unnest(matchDates) %>% 
+  select(matchDate) %>% 
+  summarise(earliest_date = min(matchDate)) %>%  
+  pull
+
+bets <- 
+  RODBC::sqlQuery(
+    channel, 
+    glue::glue(
+      "select * from SPFL.[dbo].[getMarket_v_Model_odds] ('{gameDate}') 
+      where model_desc = 'xG' 
+      and margin > 0.2"
+      )
+    ) %>% 
+  dplyr::mutate(
+    bets = paste(game, "\n ", Bet),
+  ) %>% 
+  dplyr::arrange(desc(margin))
+```
+
+
+```{r, include=TRUE}
+if(length(bets) > 0) {
+interactivePlot <-
+ggplot2::ggplot(bets) +
+  ggplot2::geom_segment(
+    ggplot2::aes(
+      x = bets, xend = bets,
+      y = modPrice, yend = mktPrice
+      )
+  ) +
+  ggiraph::geom_point_interactive( 
+    ggplot2::aes(
+      x = bets,
+      y = modPrice,
+      tooltip = paste0("Model Price:", round(modPrice, 2)), 
+      data_id = paste0("Model Price:", round(modPrice, 2))
+    ), 
+    colour = "grey",
+    size = 3
+  ) +
+  ggiraph::geom_point_interactive( 
+    ggplot2::aes(
+      x = bets,
+      y = mktPrice,
+      tooltip = paste0("Market Price:", round(mktPrice, 2)), 
+      data_id = paste0("Market Price:", round(mktPrice, 2))
+      ), 
+    colour = "blue",
+    size = 3
+  ) +
+  ggplot2::annotate(
+    geom = "text",
+    x = bets$bets,
+    y = 0.5,
+    label = paste0("Margin:", round(100 * bets$margin, 0), "%"),
+    size = 2
+  ) +
+  ggplot2::scale_y_continuous(
+    breaks = c(1.5, 2.0, 2.5, 3.0)
+  ) +
+  ggplot2::labs(
+    y = "Fractional Odds",
+    title = "SPFL Value Odds"
+  ) +
+  ggplot2::expand_limits(
+    y = 0
+  ) + 
+  ggplot2::coord_cartesian(clip = FALSE) +
+  ggplot2::coord_flip() +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_text(size = 8)
+  )
+
+ggiraph::girafe(code = print(interactivePlot) )
+  
+} else {
+  "no bets with margin > 20%"
+}
+```
+
+
+```{r}
+RODBC::odbcCloseAll()
+```
+

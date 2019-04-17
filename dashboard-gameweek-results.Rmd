@@ -1,23 +1,23 @@
 ---
-title: "SPFL 2018-2019 Results Gameweek 1"
-output: 
-  flexdashboard::flex_dashboard:
-    orientation: rows
+title: "SPFL 2018-2019 Results"
+output: html_document
 ---
 
-```{r setup, include=FALSE}
-library(flexdashboard)
+## Results {.tabset}
+
+```{r setup, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 library(RODBC)
-library(ggplot2)
+library(tidyverse)
 library(ggthemes)
-library(dplyr)
 library(stringi)
 library(stringr)
 library(glue)
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+
 channel <- odbcConnect("SPFL")
 
-dateFrom <- '2018-08-04'
-dateTo <- '2018-08-05'
+dateFrom <- '2019-04-12'
+dateTo <-   '2019-04-13'
 season <- '2018-2019'
 
 GW_results_prem <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'Premiership', '{season}')"))
@@ -25,7 +25,10 @@ GW_results_champ <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gamewe
 GW_results_L1 <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'League 1', '{season}')"))
 GW_results_L2 <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'League 2', '{season}')"))
 
+odbcCloseAll()
+
 plot_GW_results <- function(results) {
+
   
   results$team <- as.character(results$team)
   results$teamColour<- as.character(results$teamColour)
@@ -34,62 +37,92 @@ plot_GW_results <- function(results) {
   results <- results[order(results$gameID_2),]
   
   ggplot(data = results) +
-    geom_col(aes(x = reorder(team,-gameID_2), y = xG_BT, fill = reorder(team,gameID_2)),
-             colour = "black",width = 0.7) +
-    scale_fill_manual(values = results$teamColour)+ 
-    geom_text(aes(x = reorder(team,-gameID_2), y = xG_BT + 0.28, label = sprintf("%.2f", round(xG_BT,2)))
-              ,size = 3
-              ,fontface = "plain"
-              ,colour= unlist(rapply(list(results$teamColour)
-                                     ,function(x) ifelse(x=="white","black",x)
-                                     , how = "replace"))) +
+    geom_col(
+      aes(
+        x = reorder(team,-gameID_2), 
+        y = xG, 
+        fill = reorder(team, gameID_2)
+        ),
+      alpha = 0.9,
+      width = 0.7) +
+    scale_fill_manual(values = results$teamColour) + 
+    geom_text(
+      aes(
+        x = reorder(team,-gameID_2), 
+        y = xG + 0.2, 
+        label = sprintf("%.2f", round(xG,2))
+        ),
+      size = 3, 
+      colour = 
+        unlist(
+          rapply(
+            list(results$teamColour),
+            function(x) ifelse(x=="white","black",x), 
+            how = "replace")
+          )
+      ) +
     labs(x = "", y = "Expected goals") +
-    #facet_grid(gameID ~ competition, scales = "free") +
-    theme(strip.background = element_blank(),
-          strip.text.y = element_blank(),
-          panel.background = element_blank(),
-          axis.title.x=element_blank(),
-          axis.text.x = element_blank(),
-          axis.line.x=element_blank(),
-          axis.text.y=element_text(colour = "black",hjust=1, family = "courier"),
-          axis.ticks=element_blank(),
-          strip.text.x=element_text(size = 12,family = "courier", face = "italic"),
-          legend.position="none") +
+    theme_gray() +
+    theme(
+      #strip.background = element_blank(),
+      strip.text.y = element_blank(),
+      #panel.background = element_blank(),
+      axis.title.x=element_blank(),
+      axis.text.x = element_blank(),
+      axis.line.x=element_blank(),
+      axis.text.y=element_text(colour = "black", hjust=1, family = "Arial"),
+      axis.ticks=element_blank(),
+      #strip.text.x=element_text(size = 12,family = "courier", face = "italic"),
+      legend.position="none",
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = "gray90"),
+      plot.background = element_rect(fill = "gray90")
+      ) +
     coord_flip()
-
 }
-
-ifelse(nrow(GW_results_prem)>0, p1 <- plot_GW_results(GW_results_prem), p1 <- "No games this week.")
-ifelse(nrow(GW_results_champ)>0, p2 <- plot_GW_results(GW_results_champ), p2 <- "No games this week.")
-ifelse(nrow(GW_results_L1)>0, p3 <- plot_GW_results(GW_results_L1), p3 <- "No games this week.")
-ifelse(nrow(GW_results_L2)>0, p4 <- plot_GW_results(GW_results_L2), p4 <- "No games this week.")
-
 ```
 
-Premiership
-=====================================
+### Premiership
 
 ```{r, results='asis'}
-p1
+if(nrow(GW_results_prem)>0)
+   {
+     plot_GW_results(GW_results_prem)
+     } else {
+       cat("No games this week.")
+     }
 ```
 
-Championship
-=====================================
+### Championship
 
 ```{r, results='asis'}
-p2
+if(nrow(GW_results_champ)>0)
+   {
+     plot_GW_results(GW_results_champ)
+     } else {
+       cat("No games this week.")
+     }
 ```
 
-League 1
-=====================================
+### League 1
 
 ```{r, results='asis'}
-p3
+if(nrow(GW_results_L1)>0)
+   {
+     plot_GW_results(GW_results_L1)
+     } else {
+       cat("No games this week.")
+     }
 ```
 
-League 2
-=====================================
+### League 2
 
 ```{r, results='asis'}
-p4
+
+if(nrow(GW_results_L2)>0)
+   {
+     plot_GW_results(GW_results_L2)
+     } else {
+       cat("No games this week.")
+     }
 ```
