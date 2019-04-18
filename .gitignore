@@ -3,3 +3,7 @@
 .RData
 .Ruserdata
 SPFL_predictions.Rproj
+*.html
+api_token.txt
+rsconnect/
+getDetails.R

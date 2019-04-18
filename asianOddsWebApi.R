@@ -1,8 +1,8 @@
 
 authConn <-
   asianOddsAPI::authenticateConnection(
-    username = "graeme_mcinro_api",
-    password = "ac13a2ea1838dd332613195cfe3dacae"
+    username = getDetails()[1],
+    password = getDetails()[2]
   )
 
 season <- "2018-2019"
