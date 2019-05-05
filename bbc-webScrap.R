@@ -1,9 +1,9 @@
 source(file.path(getwd(), "R", "readBbcLiveText.R"))
-league <- "league-two" #premiership championship league-one league-two
+league <- "premiership" #premiership championship league-one league-two
 year <- "2019"
-month <- "04"
+month <- "05"
 season <- "2018-2019"
-nGames <- 5
+nGames <- 6
 
 bbc_leauge_links <- c("premiership", "championship", "league-one", "league-two")
 comp <- c("Premiership", "Championship", "League 1", "League 2")
@@ -37,7 +37,7 @@ links <- paste0("https://www.bbc.co.uk", links)[1:nGames]
 library(RSelenium)
 
 livetext <- 
-  purrr:::map_dfr(links[1], ~readBbcLiveText(.x)) 
+  purrr:::map_dfr(links, ~readBbcLiveText(.x)) 
 
 livetext_clean <- 
 livetext %>%
@@ -62,3 +62,23 @@ for (j in 1:nrow(livetext_clean)) {
   RODBC::sqlQuery(channel, qry)
 }
 RODBC::odbcCloseAll()
+
+
+# dataframe
+bbc_live_text_df <- 
+  purrr::map_dfr(
+    seq_along(1:nrow(livetext_clean)),
+    function(j) {
+      data.frame(
+        season = season,
+        competition = sql_league_name,
+        home = livetext_clean$home_team[j],
+        away = livetext_clean$away_team[j],
+        link = livetext_clean$link[j],
+        live_text = livetext_clean$live_text[j],
+        rowID = as.numeric(j),
+        matchDate = livetext_clean$match_date[j],
+        stringsAsFactors = FALSE
+      )
+    }
+  )
