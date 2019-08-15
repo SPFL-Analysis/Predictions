@@ -1,8 +1,10 @@
 source(file.path(getwd(), "R", "readBbcLiveText.R"))
+library(RSelenium)
+library(magrittr)
 league <- "premiership" #premiership championship league-one league-two
 year <- "2019"
-month <- "05"
-season <- "2018-2019"
+month <- "08"
+season <- "2019-2020"
 nGames <- 6
 
 bbc_leauge_links <- c("premiership", "championship", "league-one", "league-two")
@@ -16,7 +18,8 @@ bbc_url <-
     "/scores-fixtures/",
     year,
     "-",
-    month,
+    month
+    ,
     "?filter=results"
   )
 
@@ -34,10 +37,9 @@ links <- paste0("https://www.bbc.co.uk", links)[1:nGames]
 
 
 # java -Dwebdriver.chrome.driver="chromedriver.exe" -jar selenium-server-standalone-3.9.1.jar
-library(RSelenium)
 
 livetext <- 
-  purrr:::map_dfr(links, ~readBbcLiveText(.x)) 
+  purrr:::map_dfr(links[3], ~readBbcLiveText(.x)) 
 
 livetext_clean <- 
 livetext %>%
@@ -45,24 +47,6 @@ livetext %>%
                 away_team = stringr::str_remove_all(away_team, "'"),
                 live_text = stringr::str_remove_all(live_text, "'"))
   
-
-SQL_tbl <- "SPFL.dbo.SPFL_live_text"
-channel <- RODBC::odbcConnect("SPFL")
-for (j in 1:nrow(livetext_clean)) {
-  qry <- paste("insert into ", SQL_tbl, " select '"
-               , season, "', '"
-               , sql_league_name, "', '"
-               , livetext_clean$home_team[j], "', '"
-               , livetext_clean$away_team[j], "', '"
-               , livetext_clean$link[j], "', '"
-               , livetext_clean$live_text[j], "', "
-               , as.numeric(j), ", '"
-               , livetext_clean$match_date[j], "'"
-               , sep="")
-  RODBC::sqlQuery(channel, qry)
-}
-RODBC::odbcCloseAll()
-
 
 # dataframe
 bbc_live_text_df <- 

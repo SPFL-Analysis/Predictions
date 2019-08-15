@@ -33,7 +33,7 @@ readBbcLiveText <- function(bbc_url) {
     )
   resHeaders <- unlist(lapply(webElems, function(x) {x$getElementText()}))
   
-  #while the live tream tex doesnt include the first row keep showing more
+  #while the live stream text doesnt include the first row keep showing more
   while (is.na(match("First Half begins.", resHeaders))) {
     
     #click show more
