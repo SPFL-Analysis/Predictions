@@ -78,13 +78,16 @@ updated_live_text_df <-
     prem_live_text,
     championship_live_text,
     league_1_live_text,
-    league_2_live_text,
-    bbc_live_text_df
+    league_2_live_text
+    #,bbc_live_text_df
   )
 
 new_Season <- 
-dplyr::filter(updated_live_text_df,
-              season == "2019-2020") 
+  dplyr::filter(updated_live_text_df,
+                season == "2019-2020") 
+
+
+xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
 xG_df <- 
   purrr::map_dfr(seq_len(nrow(new_Season)), 
@@ -167,7 +170,7 @@ live_text_xG_DF <-
     team_xG = stringr::str_replace(.data$`team_xG`, "St. ", "St ")
   )
                
-matchDays <- c("2019-08-11", "2019-08-10", "2019-08-09")
+matchDays <- c("2019-08-23", "2019-08-24", "2019-08-25")
 gameWeekResults <- 
   live_text_xG_DF %>% 
     dplyr::filter(matchDate %in% matchDays) %>% 
@@ -186,6 +189,8 @@ gameWeekResults <-
                 .data$away == .data$team_xG_away) %>% 
   dplyr::select(-dplyr::starts_with("team_xG_"))
 
+gameWeekResults %>% 
+  View()
 
 saveRDS(updated_live_text_df,
         file.path(getwd(), "data", "spfl_live_text.RDS"))
