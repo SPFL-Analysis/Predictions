@@ -1,3 +1,5 @@
+library(magrittr)
+source('~/github/Predictions/R/getDetails.R')
 
 authConn <-
   asianOddsAPI::authenticateConnection(

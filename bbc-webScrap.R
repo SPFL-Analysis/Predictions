@@ -3,7 +3,7 @@ library(RSelenium)
 library(magrittr)
 league <- "premiership" #premiership championship league-one league-two
 year <- "2019"
-month <- "08"
+month <- "10"
 season <- "2019-2020"
 nGames <- 6
 
@@ -11,7 +11,7 @@ bbc_leauge_links <- c("premiership", "championship", "league-one", "league-two")
 comp <- c("Premiership", "Championship", "League 1", "League 2")
 sql_league_name <- comp[match(league, bbc_leauge_links)]
 
-bbc_url <-
+bbc_url <- "https://www.bbc.co.uk/sport/football/scottish-premiership/scores-fixtures/2019-10"
   paste0(
     "https://www.bbc.co.uk/sport/football/scottish-",
     league ,
@@ -36,10 +36,10 @@ links <-
 links <- paste0("https://www.bbc.co.uk", links)[1:nGames]
 
 
-# java -Dwebdriver.chrome.driver="chromedriver.exe" -jar selenium-server-standalone-3.9.1.jar
+# java -Dwebdriver.chrome.driver="chromedriver" -jar selenium-server-standalone-3.9.1.jar
 
 livetext <- 
-  purrr:::map_dfr(links[3], ~readBbcLiveText(.x)) 
+  purrr:::map_dfr(links[1], ~readBbcLiveText(.x)) 
 
 livetext_clean <- 
 livetext %>%

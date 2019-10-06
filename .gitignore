@@ -7,3 +7,4 @@ SPFL_predictions.Rproj
 api_token.txt
 rsconnect/
 getDetails.R
+config.R

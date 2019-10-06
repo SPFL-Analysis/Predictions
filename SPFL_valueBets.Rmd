@@ -6,7 +6,6 @@ output: html_document
 knitr::opts_chunk$set(include=FALSE, echo=FALSE, warning=FALSE, message=FALSE)
 library(tidyverse)
 library(asianOddsAPI)
-library(RODBC)
 library(alabama)
 channel <- RODBC::odbcConnect("SPFL")
 season <- "2018-2019"

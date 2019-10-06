@@ -1,31 +1,27 @@
 ---
-title: "SPFL 2018-2019 Results"
+title: "SPFL 2019-2020 Results"
 output: html_document
 ---
 
 ## Results {.tabset}
 
 ```{r setup, include=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
-library(RODBC)
 library(tidyverse)
-library(ggthemes)
 library(stringi)
 library(stringr)
 library(glue)
 knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 
-channel <- odbcConnect("SPFL")
+team_map <- readRDS("data/team_map.RDS")
+xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
+live_text_df <- readRDS(file.path(getwd(), "data", "spfl_live_text.RDS")) 
+gameweek_dates <- c('2019-09-27', '2019-09-28')
+gameweek_df <- get_gameweek_results(live_text_df, xG_BBC_chance, team_map, gameweek_dates)
 
-dateFrom <- '2019-04-12'
-dateTo <-   '2019-04-13'
-season <- '2018-2019'
-
-GW_results_prem <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'Premiership', '{season}')"))
-GW_results_champ <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'Championship', '{season}')"))
-GW_results_L1 <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'League 1', '{season}')"))
-GW_results_L2 <- sqlQuery(channel, glue::glue("select * from SPFL.dbo.[gameweek_results_v2] ('{dateFrom}', '{dateTo}', 'League 2', '{season}')"))
-
-odbcCloseAll()
+GW_results_prem <- dplyr::filter(gameweek_df, competition == "Premiership")
+GW_results_champ <- dplyr::filter(gameweek_df, competition == "Championship")
+GW_results_L1 <- dplyr::filter(gameweek_df, competition == "League 1")
+GW_results_L2 <- dplyr::filter(gameweek_df, competition == "League 2")
 
 plot_GW_results <- function(results) {
 
