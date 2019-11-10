@@ -78,8 +78,11 @@ updated_live_text_df <-
     championship_live_text,
     league_1_live_text,
     league_2_live_text
-    ,bbc_live_text_df
   )
+
+if(exists("bbc_live_text_df")) {
+  updated_live_text_df <- dplyr::bind_rows(updated_live_text_df, bbc_live_text_df)
+}
 
 team_map <- readRDS("data/team_map.RDS") %>% 
   dplyr::mutate(
@@ -89,7 +92,7 @@ team_map <- readRDS("data/team_map.RDS") %>%
 
 xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
-gameweek_dates <- c("2019-10-04", "2019-10-05", "2019-10-06")
+gameweek_dates <- c("2019-11-08", "2019-11-09", "2019-11-10")
 check <- get_gameweek_results(updated_live_text_df, xG_BBC_chance, team_map, gameweek_dates)
 View(check)
 

@@ -1,11 +1,12 @@
-get_gameweek_results <- function(df, xG_map_df, team_map_df, gameweek_dates) {
+get_gameweek_results <- function(df, xG_map_df, team_map_df, gameweek_dates = NULL) {
   
-  gameweek_results_df <-
-    df %>% 
-    dplyr::mutate(
-      matchDate = sky_asDate(.data$matchDate)
-    ) %>% 
-    dplyr::filter(matchDate %in% gameweek_dates)
+  gameweek_results_df <- df %>% 
+    dplyr::mutate(matchDate = sky_asDate(.data$matchDate))
+    
+  if (length(gameweek_dates) != 0) {
+    gameweek_results_df <- 
+      dplyr::filter(gameweek_results_df, matchDate %in% gameweek_dates)
+  }
   
   if(nrow(gameweek_results_df) == 0) stop("no games for entered gameweek_dates", call. = FALSE)
   

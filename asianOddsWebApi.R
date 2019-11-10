@@ -33,7 +33,3 @@ FT1X2_SQL <-
   tidyr::spread(dplyr::select(FT1X2, -bookie), market, odds) %>%
   dplyr::mutate(leagueName = stringr::str_remove_all(leagueName, "SCOTLAND ")) %>%
   dplyr::select(leagueName, homeTeam, awayTeam, matchDate, home, draw, away)
-
-#FT1X2_SQL <- dplyr::filter(FT1X2_SQL, matchDate <= "2019-03-23")
-
-writeFT1X2OddsSQL(season, Sys.Date(), FT1X2_SQL)

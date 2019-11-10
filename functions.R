@@ -265,7 +265,7 @@ fitDCmodel <- function(data_) {
 # function to return predicted match odds
 ####################################################################################################
 
-match_odds <- function(model_name, home, away) {
+  match_odds <- function(model_name, home, away) {
   home <- stringr::str_trim(home)
   away <- stringr::str_trim(away)
   lambda <- predict(model_name, data.frame(home = 1, team = home, opp = away), type = "response")
@@ -278,19 +278,30 @@ match_odds <- function(model_name, home, away) {
   DrawP <- sum(diag(probability_matrix))
   AwayP <- sum(probability_matrix[upper.tri(probability_matrix)])
 
-  HomeWin <- 1.0 / HomeP
-  Draw <- 1.0 / DrawP
-  AwayWin <- 1.0 / AwayP
+  homeBet <- if(HomeP > AwayP) {
+    dplyr::tibble(
+      homeBet = "Home -0.5",
+      modPrice_home = 1.0 / HomeP
+    )
+  } else {
+    dplyr::tibble(
+      homeBet = "Home +0.5",
+      modPrice_home = 1.0 / (1 - AwayP)
+    )
+  }
+  awayBet <- if(AwayP > HomeP) {
+    dplyr::tibble(
+      awayBet = "Away -0.5",
+      modPrice_away = 1.0 / AwayP
+    )
+  } else {
+    dplyr::tibble(
+      awayBet = "Away +0.5",
+      modPrice_away = 1.0 / (1 - HomeP)
+    )
+  }
 
-  results <- data.frame(home
-    , away
-    , HomeWin
-    , Draw
-    , AwayWin,
-    stringsAsFactors = FALSE
-  )
-
-  return(results)
+  dplyr::bind_cols(homeBet, awayBet)
 }
 
 ###################################################################################
