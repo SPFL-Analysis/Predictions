@@ -7,7 +7,6 @@ authConn <-
     password = getDetails()[2]
   )
 
-season <- "2018-2019"
 sportsType <- asianOddsAPI::getSportsId(url = authConn$url, token = authConn$token)
 marketTypeId <- 2
 oddsFormat <- "00"

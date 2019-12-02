@@ -40,7 +40,7 @@ prem_live_text <-
                       yearGames)
 
 championship_live_text <-
-  createSkyLiveTextDf(SPFL_Champ[1:5,], 
+  createSkyLiveTextDf(SPFL_Champ[1:3,], 
                       'SPFL.dbo.SPFL_live_text', 
                       season, 
                       'Championship', 
@@ -54,7 +54,7 @@ league_1_live_text <-
                       yearGames)
 
 league_2_live_text <-
-  createSkyLiveTextDf(SPFL_L2[1:5,], 
+  createSkyLiveTextDf(SPFL_L2[1:4,], 
                       'SPFL.dbo.SPFL_live_text', 
                       season, 
                       'League 2', 
@@ -92,7 +92,7 @@ team_map <- readRDS("data/team_map.RDS") %>%
 
 xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
-gameweek_dates <- c("2019-11-08", "2019-11-09", "2019-11-10")
+gameweek_dates <- c("2019-12-01", "2019-11-30")
 check <- get_gameweek_results(updated_live_text_df, xG_BBC_chance, team_map, gameweek_dates)
 View(check)
 

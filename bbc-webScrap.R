@@ -3,7 +3,7 @@ library(RSelenium)
 library(magrittr)
 league <- "premiership" #premiership championship league-one league-two
 year <- "2019"
-month <- "11"
+month <- "12"
 season <- "2019-2020"
 nGames <- 2
 
@@ -19,8 +19,8 @@ bbc_url <-
     year,
     "-",
     month
-    #,
-    #"?filter=results"
+    ,
+    "?filter=results"
   )
 
 bbb_html <- xml2::read_html(bbc_url)
@@ -39,7 +39,7 @@ cmd <- 'cd Documents; java -Dwebdriver.chrome.driver="chromedriver" -jar seleniu
 system2(cmd)
 
 livetext <- 
-  purrr:::map_dfr(links[2], ~readBbcLiveText(.x)) 
+  purrr:::map_dfr(links[1], ~readBbcLiveText(.x)) 
 
 livetext_clean <- 
 livetext %>%
