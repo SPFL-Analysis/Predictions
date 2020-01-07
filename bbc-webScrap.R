@@ -5,7 +5,7 @@ league <- "premiership" #premiership championship league-one league-two
 year <- "2019"
 month <- "12"
 season <- "2019-2020"
-nGames <- 2
+nGames <- 6
 
 bbc_leauge_links <- c("premiership", "championship", "league-one", "league-two")
 comp <- c("Premiership", "Championship", "League 1", "League 2")
@@ -35,8 +35,8 @@ links <-
 
 links <- paste0("https://www.bbc.co.uk", links)[1:nGames]
 
-cmd <- 'cd Documents; java -Dwebdriver.chrome.driver="chromedriver" -jar selenium-server-standalone-3.9.1.jar'
-system2(cmd)
+cmd <- 'cd ~/Documents; java -Dwebdriver.chrome.driver=chromedriver -jar selenium-server-standalone-3.9.1.jar &'
+system(cmd)
 
 livetext <- 
   purrr:::map_dfr(links[1], ~readBbcLiveText(.x)) 

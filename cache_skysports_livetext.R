@@ -8,7 +8,7 @@ library(dplyr)
 
 source("functions.R")
 purrr::walk(list.files("R", full.names = T), ~ source(.))
-yearGames <- '2019'
+yearGames <- '2020'
 season <- '2019-2020'
 
 #############################################################################################
@@ -30,35 +30,50 @@ SPFL_L1 <-
 SPFL_L2 <- 
   getLinks("http://www.skysports.com/football/competitions/scottish-league-two/results")
 
+nprem <-0
+nchamp <- 5
+nl1 <- 5
+nl2 <-5
 
+prem_live_text <- NULL
+if(nprem > 0) {
+  prem_live_text <-
+    createSkyLiveTextDf(SPFL_Prem[1:nprem,], 
+                        'SPFL.dbo.SPFL_live_text', 
+                        season, 
+                        'Premiership', 
+                        yearGames)
+}
 
-prem_live_text <-
-  createSkyLiveTextDf(SPFL_Prem[1:6,], 
-                      'SPFL.dbo.SPFL_live_text', 
-                      season, 
-                      'Premiership', 
-                      yearGames)
-
+championship_live_text <- NULL
+if(nchamp > 0) {
 championship_live_text <-
-  createSkyLiveTextDf(SPFL_Champ[1:3,], 
+  createSkyLiveTextDf(SPFL_Champ[1:nchamp,], 
                       'SPFL.dbo.SPFL_live_text', 
                       season, 
                       'Championship', 
                       yearGames)
+}
 
+league_1_live_text <- NULL
+if(nl1 > 0) {
 league_1_live_text <-
-  createSkyLiveTextDf(SPFL_L1[1:5,], 
+  createSkyLiveTextDf(SPFL_L1[1:nl1,], 
                       'SPFL.dbo.SPFL_live_text', 
                       season, 
                       'League 1', 
                       yearGames)
+}
 
+league_2_live_text <- NULL
+if(nl2 > 0) {
 league_2_live_text <-
-  createSkyLiveTextDf(SPFL_L2[1:4,], 
+  createSkyLiveTextDf(SPFL_L2[1:nl2,], 
                       'SPFL.dbo.SPFL_live_text', 
                       season, 
                       'League 2', 
                       yearGames)
+}
 
 # load rsd ####
 currentDf <- readRDS(file.path(getwd(), "data", "spfl_live_text.RDS")) %>% 
@@ -92,7 +107,7 @@ team_map <- readRDS("data/team_map.RDS") %>%
 
 xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
-gameweek_dates <- c("2019-12-01", "2019-11-30")
+gameweek_dates <- c("2020-01-04")
 check <- get_gameweek_results(updated_live_text_df, xG_BBC_chance, team_map, gameweek_dates)
 View(check)
 
