@@ -13,6 +13,8 @@ raw_livetext <- readRDS(file.path(getwd(), "data", "spfl_live_text.RDS"))
 team_map <- readRDS("data/team_map.RDS")
 xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
+matchDates <- NULL #as.Date(c('2020-01-29', '2020-01-25', '2020-01-26'))
+
 seasons <- c("2018-2019", "2019-2020")
 df <- dplyr::filter(raw_livetext, .data$season %in% seasons)
 xG_data <- get_gameweek_results(df, xG_BBC_chance, team_map)
@@ -40,7 +42,11 @@ GLM_Data <-
     )
   )
 
+if (length(matchDates) == 0) {
+  matchDates <- unique(FT1X2_SQL[["matchDate"]])
+}
 all_gameweek_matches <- FT1X2_SQL %>%
+  dplyr::filter(.data$matchDate %in% matchDates) %>% 
   dplyr::mutate(
     clean_homeTeam = get_long_name(.data$homeTeam, team_map$long_name, team_map$short_name),
     clean_awayTeam = get_long_name(.data$awayTeam, team_map$long_name, team_map$short_name)
@@ -139,7 +145,7 @@ bets <-
   dplyr::mutate(
     mktPrice = as.numeric(.data$mktPrice),
     modPrice = as.numeric(.data$modPrice),
-    margin = (as.numeric(.data$mktPrice) / as.numeric(.data$modPrice)) - 1,
+    margin = (as.numeric(.data$modPrice) / as.numeric(.data$mktPrice)) - 1,
     bet_label = paste0(.data$clean_homeTeam, " v ", .data$clean_awayTeam, "\n", .data$bet),
   ) %>%
   dplyr::filter(.data$margin >= 0.2)   %>% 

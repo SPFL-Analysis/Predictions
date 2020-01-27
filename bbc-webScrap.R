@@ -2,8 +2,8 @@ source(file.path(getwd(), "R", "readBbcLiveText.R"))
 library(RSelenium)
 library(magrittr)
 league <- "premiership" #premiership championship league-one league-two
-year <- "2019"
-month <- "12"
+year <- "2020"
+month <- "01"
 season <- "2019-2020"
 nGames <- 6
 
@@ -35,11 +35,11 @@ links <-
 
 links <- paste0("https://www.bbc.co.uk", links)[1:nGames]
 
-cmd <- 'cd ~/Documents; java -Dwebdriver.chrome.driver=chromedriver -jar selenium-server-standalone-3.9.1.jar &'
+  cmd <- 'cd ~/Documents/Rselenium; java -Dwebdriver.chrome.driver=chromedriver -jar selenium-server-standalone-3.9.1.jar &'
 system(cmd)
 
 livetext <- 
-  purrr:::map_dfr(links[1], ~readBbcLiveText(.x)) 
+  purrr:::map_dfr(links[c(1, 2)], ~readBbcLiveText(.x)) 
 
 livetext_clean <- 
 livetext %>%

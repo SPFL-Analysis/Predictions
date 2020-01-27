@@ -30,10 +30,10 @@ SPFL_L1 <-
 SPFL_L2 <- 
   getLinks("http://www.skysports.com/football/competitions/scottish-league-two/results")
 
-nprem <-0
-nchamp <- 5
+nprem <-6
+nchamp <- 4
 nl1 <- 5
-nl2 <-5
+nl2 <- 5
 
 prem_live_text <- NULL
 if(nprem > 0) {
@@ -107,10 +107,11 @@ team_map <- readRDS("data/team_map.RDS") %>%
 
 xG_BBC_chance <- readRDS(file.path(getwd(), "data", "xG_BBC_chance.RDS"))
 
-gameweek_dates <- c("2020-01-04")
+gameweek_dates <- c("2020-01-26")
 check <- get_gameweek_results(updated_live_text_df, xG_BBC_chance, team_map, gameweek_dates)
 View(check)
 
 #save if things all look fine
 saveRDS(updated_live_text_df,
         file.path(getwd(), "data", "spfl_live_text.RDS"))
+
